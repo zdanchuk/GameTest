@@ -1,4 +1,5 @@
 package org.example
+
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -19,9 +20,9 @@ suspend fun testPrint(i: Int): Unit {
 
 @OptIn(DelicateCoroutinesApi::class)
 fun main() {
-    val actionList : MutableList<Deferred<Unit>> = ArrayList()
+    val actionList: MutableList<Deferred<Unit>> = ArrayList()
     for (i in 1..10) {
-        actionList.addLast(GlobalScope.async(Dispatchers.Default, CoroutineStart.DEFAULT) { testPrint(i)})
+        actionList.addLast(GlobalScope.async(Dispatchers.Default, CoroutineStart.DEFAULT) { testPrint(i) })
     }
     runBlocking {
 
@@ -41,30 +42,31 @@ fun main() {
 //            println("Planning to Cancel schedule with printing \"!!!\"")
 //        }
 
-        var count = 5
-        val timer = Timer()
-        val timerTask : Any
+        val test = object {
+            lateinit var timer: Timer
 
-        timerTask = object : TimerTask() {
-            override fun run() {
-                println(" !!!")
-                count--
-                if (count == 0) {
-                    println(this)
-                    println(this.scheduledExecutionTime())
-                    this.cancel()
-                    println(" !!!!!!! canceling")
+            var timerTask = object : TimerTask() {
+                var count = 5
+                override fun run() {
+                    println(" !!!")
+                    count--
+                    if (count == 0) {
+                        println(this)
+                        println(this.scheduledExecutionTime())
+                        this.cancel()
+                        println(" !!!!!!! canceling")
+                    }
                 }
             }
         }
 
-        timer.schedule(timerTask, 100, 1000)
+        test.timer.schedule(test.timerTask, 100, 1000)
         println("d")
-        println(timer)
+        println(test.timer)
         delay(3000)
-        timer.also {
+        test.timer.also {
             println("Canceling")
-            timerTask.cancel()
+            test.timerTask.cancel()
         }.cancel()
     }
 
